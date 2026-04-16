@@ -10,6 +10,7 @@ interface StudentRecord {
 }
 
 export default function Home() {
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [scores, setScores] = useState({
     quiz: { score: 0, total: 100 },
@@ -35,15 +36,57 @@ export default function Home() {
 
   const getPercent = (part: { score: number; total: number }) => (part.total > 0 ? (part.score / part.total) * 100 : 0);
 
+  const resetForm = () => {
+    setName('');
+    setEditingId(null);
+    setScores({
+      quiz: { score: 0, total: 100 },
+      lab: { score: 0, total: 100 },
+      assign: { score: 0, total: 100 },
+      atten: { score: 0, total: 100 },
+      exam: { score: 0, total: 100 },
+    });
+  };
+
   const addStudent = async () => {
     if (!name.trim()) return alert("Enter Student Name");
-    const { error } = await supabase.from('student3_grades').insert([{ 
+    
+    const payload = { 
       student_name: name, 
-      quiz: getPercent(scores.quiz), laboratory: getPercent(scores.lab), 
-      assignment: getPercent(scores.assign), attendance: getPercent(scores.atten), 
+      quiz: getPercent(scores.quiz), 
+      laboratory: getPercent(scores.lab), 
+      assignment: getPercent(scores.assign), 
+      attendance: getPercent(scores.atten), 
       major_exam: getPercent(scores.exam) 
-    }]);
-    if (error) alert("Sync Error"); else { setName(''); fetchRecords(); }
+    };
+
+    let error;
+    if (editingId) {
+      const { error: updateError } = await supabase.from('student3_grades').update(payload).eq('id', editingId);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase.from('student3_grades').insert([payload]);
+      error = insertError;
+    }
+
+    if (error) alert("Sync Error"); 
+    else { 
+      resetForm(); 
+      fetchRecords(); 
+    }
+  };
+
+  const handleEdit = (r: StudentRecord) => {
+    setEditingId(r.id);
+    setName(r.student_name);
+    setScores({
+      quiz: { score: r.quiz, total: 100 },
+      lab: { score: r.laboratory, total: 100 },
+      assign: { score: r.assignment, total: 100 },
+      atten: { score: r.attendance, total: 100 },
+      exam: { score: r.major_exam, total: 100 },
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const deleteRecord = async (id: string) => {
@@ -56,11 +99,12 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white flex flex-col md:flex-row font-sans text-emerald-950">
       
-      {/* SIDEBAR: Emerald Navigation */}
+      {/* SIDEBAR */}
       <aside className="w-full md:w-80 bg-emerald-950 md:min-h-screen p-8 flex flex-col border-r border-emerald-800">
         <div className="mb-10 text-center md:text-left">
           <h1 className="text-xl font-black text-white tracking-widest uppercase">Academic Portal</h1>
           <div className="h-1.5 w-10 bg-emerald-400 mt-2 rounded-full mx-auto md:mx-0"></div>
+          {editingId && <p className="text-[9px] text-yellow-400 font-bold mt-2 uppercase tracking-widest">Editing Record...</p>}
         </div>
 
         <div className="space-y-6 flex-grow overflow-y-auto pr-2">
@@ -82,6 +126,7 @@ export default function Home() {
                     <p className="text-[9px] text-emerald-600 font-bold uppercase mb-1">Score</p>
                     <input 
                       type="number" className="w-full bg-emerald-950 border border-emerald-700 rounded-lg p-2 text-xs font-black text-white outline-none focus:border-emerald-400"
+                      value={scores[k as keyof typeof scores].score}
                       onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], score: Number(e.target.value)}})}
                     />
                   </div>
@@ -90,7 +135,8 @@ export default function Home() {
                     <p className="text-[9px] text-emerald-600 font-bold uppercase mb-1">Total</p>
                     <input 
                       type="number" className="w-full bg-emerald-950 border border-emerald-700 rounded-lg p-2 text-xs font-black text-emerald-400 outline-none focus:border-emerald-400"
-                      defaultValue={100} onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], total: Number(e.target.value)}})}
+                      value={scores[k as keyof typeof scores].total}
+                      onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], total: Number(e.target.value)}})}
                     />
                   </div>
                 </div>
@@ -99,12 +145,17 @@ export default function Home() {
           </div>
         </div>
 
-        <button 
-          onClick={addStudent}
-          className="mt-8 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black py-4 rounded-2xl transition-all shadow-lg text-xs uppercase tracking-widest active:scale-95"
-        >
-          Commit to Database
-        </button>
+        <div className="flex flex-col gap-2 mt-8">
+          <button 
+            onClick={addStudent}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black py-4 rounded-2xl transition-all shadow-lg text-xs uppercase tracking-widest active:scale-95"
+          >
+            {editingId ? "Update Record" : "Commit to Database"}
+          </button>
+          {editingId && (
+            <button onClick={resetForm} className="text-[10px] font-black text-emerald-400 uppercase hover:text-white transition-colors">Cancel Edit</button>
+          )}
+        </div>
       </aside>
 
       {/* MAIN CONTENT */}
@@ -114,7 +165,7 @@ export default function Home() {
             <h2 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Management Console</h2>
             <p className="text-3xl font-light text-emerald-900">Registered <span className="font-black">Records</span></p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end gap-2">
             <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-5 py-2.5 rounded-full border border-emerald-200 uppercase tracking-widest">
               {records.length} Active Nodes
             </span>
@@ -138,7 +189,7 @@ export default function Home() {
                     <p className="font-black text-emerald-950 text-base uppercase tracking-tight">{r.student_name}</p>
                     <div className="flex gap-2 mt-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 self-center"></span>
-                      <p className="text-[10px] text-emerald-600 font-bold uppercase">System Verified</p>
+                      <p className="text-[10px] text-emerald-600 font-bold uppercase">Verified</p>
                     </div>
                   </td>
                   <td className="px-6 py-8 text-center">
@@ -158,15 +209,20 @@ export default function Home() {
                     </div>
                   </td>
                   <td className="px-10 py-8 text-right">
-                    <button onClick={() => deleteRecord(r.id)} className="p-3 text-emerald-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all border border-transparent hover:border-red-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => handleEdit(r)} className="p-3 text-emerald-300 hover:text-emerald-600 hover:bg-emerald-100 rounded-2xl transition-all border border-transparent">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </button>
+                      <button onClick={() => deleteRecord(r.id)} className="p-3 text-emerald-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all border border-transparent">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {loading && <div className="p-24 text-center font-black text-emerald-200 uppercase text-[10px] tracking-[0.5em] animate-pulse">Establishing Cloud Link...</div>}
+          {loading && <div className="p-24 text-center font-black text-emerald-200 uppercase text-[10px] tracking-[0.5em] animate-pulse">Syncing...</div>}
         </div>
       </section>
     </main>
