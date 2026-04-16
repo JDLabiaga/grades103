@@ -36,94 +36,121 @@ export default function Home() {
   const getPercent = (part: { score: number; total: number }) => (part.total > 0 ? (part.score / part.total) * 100 : 0);
 
   const addStudent = async () => {
-    if (!name.trim()) return alert("Enter Name");
+    if (!name.trim()) return alert("Enter Student Name");
     const { error } = await supabase.from('student3_grades').insert([{ 
       student_name: name, 
       quiz: getPercent(scores.quiz), laboratory: getPercent(scores.lab), 
       assignment: getPercent(scores.assign), attendance: getPercent(scores.atten), 
       major_exam: getPercent(scores.exam) 
     }]);
-    if (error) alert("Error saving"); else { setName(''); fetchRecords(); }
+    if (error) alert("Sync Error"); else { setName(''); fetchRecords(); }
   };
 
   const deleteRecord = async (id: string) => {
-    if (confirm("Delete?")) {
+    if (confirm("Confirm Deletion?")) {
       const { error } = await supabase.from('student3_grades').delete().eq('id', id);
       if (!error) fetchRecords();
     }
   };
 
   return (
-    <main className="min-h-screen bg-[#f0f9f6] p-4 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-emerald-900 rounded-3xl p-8 shadow-xl mb-8 text-white border-b-4 border-emerald-500">
-          <h1 className="text-3xl font-black tracking-tighter uppercase">Batch 103 Academic Portal</h1>
-          <p className="text-emerald-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Data Management • Section C</p>
+    <main className="min-h-screen bg-white flex flex-col md:flex-row font-sans text-slate-900">
+      
+      {/* SIDEBAR: Dark Minimalist Navigation */}
+      <aside className="w-full md:w-72 bg-slate-900 md:min-h-screen p-8 flex flex-col">
+        <div className="mb-12">
+          <h1 className="text-xl font-black text-white tracking-widest uppercase">Academic Portal</h1>
+          <div className="h-1 w-12 bg-blue-500 mt-2"></div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          <div className="xl:col-span-1 bg-white rounded-3xl p-6 shadow-md border border-emerald-100 h-fit">
-            <h3 className="text-sm font-black text-emerald-900 uppercase mb-6 flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-emerald-500 rounded-full"></span> Input Record
-            </h3>
-            <div className="space-y-6">
-              <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Student Name</label>
-                <input className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-emerald-500 outline-none font-bold text-black" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="space-y-8 flex-grow">
+          <div>
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 block">Main Entry</label>
+            <input 
+              className="w-full bg-slate-800 border-none rounded-lg p-3 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Student Name" value={name} onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-4">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] block">Grade Weights</label>
+            {Object.keys(scores).map((k) => (
+              <div key={k} className="flex items-center justify-between group">
+                <span className="text-xs font-bold text-slate-400 uppercase group-hover:text-white transition-colors">{k}</span>
+                <input 
+                  type="number" className="w-16 bg-slate-800 text-center rounded-md p-1 text-xs font-black text-blue-400 outline-none"
+                  placeholder="0" onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], score: Number(e.target.value)}})}
+                />
               </div>
-              {Object.keys(scores).map((k) => (
-                <div key={k} className="space-y-1">
-                  <span className="text-[9px] font-black text-slate-400 uppercase">{k}</span>
-                  <div className="flex items-center bg-white rounded-xl px-3 py-2 border-2 border-slate-50 focus-within:border-emerald-500 transition-all">
-                    <input type="number" className="w-full bg-transparent text-left font-bold text-black outline-none text-sm" placeholder="Score" onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], score: Number(e.target.value)}})} />
-                    <span className="text-slate-300 font-black mx-2">/</span>
-                    <input type="number" className="w-10 bg-transparent text-center font-black text-emerald-600 outline-none text-sm" defaultValue={100} onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], total: Number(e.target.value)}})} />
-                  </div>
-                </div>
-              ))}
-              <button onClick={addStudent} className="w-full bg-emerald-600 hover:bg-emerald-900 text-white font-black py-4 rounded-xl transition-all shadow-lg uppercase text-xs">Save Batch 103</button>
-            </div>
-          </div>
-
-          <div className="xl:col-span-3 bg-white rounded-3xl shadow-md border border-emerald-50 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-emerald-50/30 flex justify-between items-center">
-              <h3 className="text-sm font-black text-emerald-900 uppercase tracking-widest">Student Summary Table</h3>
-              <span className="text-[10px] font-black text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full uppercase">Database 3 Active</span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-900 text-[9px] font-black text-slate-400 uppercase">
-                  <tr>
-                    <th className="px-6 py-4">Student</th>
-                    <th className="px-4 py-4 text-center">QZ</th><th className="px-4 py-4 text-center">LB</th>
-                    <th className="px-4 py-4 text-center">AS</th><th className="px-4 py-4 text-center">AT</th>
-                    <th className="px-4 py-4 text-center">EX</th><th className="px-6 py-4 text-center">Final</th>
-                    <th className="px-6 py-4 text-right">Del</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50 text-black">
-                  {records.map((r) => (
-                    <tr key={r.id} className="hover:bg-emerald-50/50 transition-colors">
-                      <td className="px-6 py-4 font-bold text-sm uppercase">{r.student_name}</td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-500 text-xs">{r.quiz?.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-500 text-xs">{r.laboratory?.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-500 text-xs">{r.assignment?.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-500 text-xs">{r.attendance?.toFixed(1)}</td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-500 text-xs">{r.major_exam?.toFixed(1)}</td>
-                      <td className="px-6 py-4 text-center font-black text-emerald-700 bg-emerald-50/50">{r.final_grade?.toFixed(1)}%</td>
-                      <td className="px-6 py-4 text-right">
-                        <button onClick={() => deleteRecord(r.id)} className="text-slate-300 hover:text-red-500 transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+
+        <button 
+          onClick={addStudent}
+          className="mt-8 bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all shadow-lg text-xs uppercase tracking-widest active:scale-95"
+        >
+          Push to Cloud
+        </button>
+      </aside>
+
+      {/* MAIN CONTENT: Clean Data Display */}
+      <section className="flex-grow p-6 md:p-12 bg-slate-50">
+        <header className="flex justify-between items-end mb-10 border-b border-slate-200 pb-6">
+          <div>
+            <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Active Records</h2>
+            <p className="text-3xl font-light text-slate-800">Database <span className="font-black">Batch 03</span></p>
+          </div>
+          <div className="text-right">
+            <span className="text-xs font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-full border border-blue-100 uppercase">
+              {records.length} Total Students
+            </span>
+          </div>
+        </header>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50 text-[10px] font-black text-slate-500 uppercase">
+                <th className="px-8 py-5">Full Identity</th>
+                <th className="px-6 py-5 text-center">Score Matrix</th>
+                <th className="px-6 py-5 text-center">Finalized</th>
+                <th className="px-8 py-5 text-right">Settings</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {records.map((r) => (
+                <tr key={r.id} className="hover:bg-slate-50 transition-all">
+                  <td className="px-8 py-6">
+                    <p className="font-black text-slate-800 text-sm uppercase">{r.student_name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Status: Enrolled</p>
+                  </td>
+                  <td className="px-6 py-6 text-center">
+                    <div className="flex justify-center gap-2">
+                      {['quiz', 'laboratory'].map(key => (
+                        <div key={key} className="bg-slate-100 px-3 py-1 rounded text-[9px] font-black text-slate-600 uppercase border border-slate-200">
+                          {key[0]}: {r[key as keyof StudentRecord]}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-6 text-center">
+                    <span className="text-lg font-black text-slate-900">
+                      {r.final_grade?.toFixed(1)}%
+                    </span>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                    <button onClick={() => deleteRecord(r.id)} className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {loading && <div className="p-20 text-center font-black text-slate-300 uppercase text-xs animate-pulse">Establishing Connection...</div>}
+        </div>
+      </section>
     </main>
   );
 }
