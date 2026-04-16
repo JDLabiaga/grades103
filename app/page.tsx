@@ -97,44 +97,44 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white flex flex-col md:flex-row font-sans text-emerald-950">
+    <main className="min-h-screen bg-slate-50 flex flex-col md:flex-row font-sans text-emerald-950">
       
-      {/* SIDEBAR */}
-      <aside className="w-full md:w-80 bg-emerald-950 md:min-h-screen p-8 flex flex-col border-r border-emerald-800">
+      {/* SIDEBAR: Emerald Navigation Terminal */}
+      <aside className="w-full md:w-80 bg-emerald-950 md:min-h-screen p-8 flex flex-col border-r border-emerald-900 shadow-2xl z-10">
         <div className="mb-10 text-center md:text-left">
-          <h1 className="text-xl font-black text-white tracking-widest uppercase">Academic Portal</h1>
-          <div className="h-1.5 w-10 bg-emerald-400 mt-2 rounded-full mx-auto md:mx-0"></div>
-          {editingId && <p className="text-[9px] text-yellow-400 font-bold mt-2 uppercase tracking-widest">Editing Record...</p>}
+          <h1 className="text-xl font-black text-white tracking-[0.2em] uppercase">Academic Portal</h1>
+          <div className="h-1 w-12 bg-emerald-400 mt-3 rounded-full mx-auto md:mx-0"></div>
+          {editingId && <p className="text-[10px] text-emerald-300 font-bold mt-3 uppercase animate-pulse tracking-widest">Modified Mode Active</p>}
         </div>
 
         <div className="space-y-6 flex-grow overflow-y-auto pr-2">
           <div>
-            <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 block">Identity</label>
+            <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 block">Full Name</label>
             <input 
-              className="w-full bg-emerald-900/50 border border-emerald-700/50 rounded-xl p-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-400 outline-none transition-all placeholder:text-emerald-700"
-              placeholder="Full Student Name" value={name} onChange={(e) => setName(e.target.value)}
+              className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl p-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-400 outline-none transition-all"
+              placeholder="e.g. John Doe" value={name} onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest block">Performance Matrix</label>
+            <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest block">Grade Matrix</label>
             {Object.keys(scores).map((k) => (
-              <div key={k} className="bg-emerald-900/30 p-4 rounded-2xl border border-emerald-800/40">
-                <span className="text-[10px] font-black text-emerald-400 uppercase block mb-3">{k}</span>
-                <div className="flex items-center gap-2">
+              <div key={k} className="bg-emerald-900/20 p-4 rounded-2xl border border-emerald-800/30 group hover:border-emerald-500/50 transition-all">
+                <span className="text-[10px] font-black text-emerald-400 uppercase block mb-3">{k} Analysis</span>
+                <div className="flex items-center gap-3">
                   <div className="flex-1">
-                    <p className="text-[9px] text-emerald-600 font-bold uppercase mb-1">Score</p>
+                    <p className="text-[8px] text-emerald-600 font-bold uppercase mb-1">Raw</p>
                     <input 
-                      type="number" className="w-full bg-emerald-950 border border-emerald-700 rounded-lg p-2 text-xs font-black text-white outline-none focus:border-emerald-400"
+                      type="number" className="w-full bg-emerald-950 border border-emerald-800 rounded-lg p-2 text-xs font-black text-white outline-none focus:border-emerald-400"
                       value={scores[k as keyof typeof scores].score}
                       onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], score: Number(e.target.value)}})}
                     />
                   </div>
-                  <div className="flex-1 text-center self-end pb-2 font-black text-emerald-700">/</div>
+                  <div className="text-emerald-800 font-black self-end pb-2">/</div>
                   <div className="flex-1">
-                    <p className="text-[9px] text-emerald-600 font-bold uppercase mb-1">Total</p>
+                    <p className="text-[8px] text-emerald-600 font-bold uppercase mb-1">Base</p>
                     <input 
-                      type="number" className="w-full bg-emerald-950 border border-emerald-700 rounded-lg p-2 text-xs font-black text-emerald-400 outline-none focus:border-emerald-400"
+                      type="number" className="w-full bg-emerald-950 border border-emerald-800 rounded-lg p-2 text-xs font-black text-emerald-400 outline-none focus:border-emerald-400"
                       value={scores[k as keyof typeof scores].total}
                       onChange={(e) => setScores({...scores, [k]: {...scores[k as keyof typeof scores], total: Number(e.target.value)}})}
                     />
@@ -145,76 +145,80 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 mt-8">
+        <div className="mt-8 space-y-3">
           <button 
             onClick={addStudent}
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black py-4 rounded-2xl transition-all shadow-lg text-xs uppercase tracking-widest active:scale-95"
           >
-            {editingId ? "Update Record" : "Commit to Database"}
+            {editingId ? "Update System" : "Push to Database"}
           </button>
           {editingId && (
-            <button onClick={resetForm} className="text-[10px] font-black text-emerald-400 uppercase hover:text-white transition-colors">Cancel Edit</button>
+            <button onClick={resetForm} className="w-full text-[10px] font-black text-emerald-500 uppercase hover:text-white transition-colors py-2">Discard Changes</button>
           )}
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <section className="flex-grow p-6 md:p-12 bg-emerald-50/30 overflow-x-hidden">
-        <header className="flex justify-between items-end mb-10 border-b border-emerald-100 pb-8">
+      {/* MAIN CONTENT AREA */}
+      <section className="flex-grow p-6 md:p-12 overflow-x-hidden">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 border-b border-slate-200 pb-10">
           <div>
-            <h2 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Management Console</h2>
-            <p className="text-3xl font-light text-emerald-900">Registered <span className="font-black">Records</span></p>
+            <h2 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] mb-2">Central Management</h2>
+            <p className="text-4xl font-light text-slate-800 tracking-tight">Active <span className="font-black text-emerald-950 underline decoration-emerald-400 underline-offset-8">Academic Records</span></p>
           </div>
-          <div className="text-right flex flex-col items-end gap-2">
-            <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-5 py-2.5 rounded-full border border-emerald-200 uppercase tracking-widest">
-              {records.length} Active Nodes
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-[10px] font-black text-slate-400 uppercase">System Status</p>
+              <p className="text-xs font-bold text-emerald-600">Encrypted & Live</p>
+            </div>
+            <div className="h-12 w-[1px] bg-slate-200 mx-2"></div>
+            <span className="text-lg font-black text-emerald-950 bg-white px-6 py-3 rounded-2xl border border-slate-200 shadow-sm">
+              {records.length} <span className="text-[10px] text-slate-400 ml-1">UNITS</span>
             </span>
           </div>
         </header>
 
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-emerald-100 overflow-hidden">
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-emerald-900/5 border border-slate-200 overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-emerald-900 text-[10px] font-black text-emerald-400 uppercase">
-                <th className="px-10 py-6">Student Information</th>
-                <th className="px-6 py-6 text-center">Data Points</th>
-                <th className="px-6 py-6 text-center">Evaluation</th>
-                <th className="px-10 py-6 text-right">Actions</th>
+              <tr className="bg-slate-900 text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                <th className="px-10 py-7">Student Identity</th>
+                <th className="px-6 py-7 text-center">Score Data</th>
+                <th className="px-6 py-7 text-center">Finalized %</th>
+                <th className="px-10 py-7 text-right">Administrative</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-50 text-black">
+            <tbody className="divide-y divide-slate-50">
               {records.map((r) => (
-                <tr key={r.id} className="hover:bg-emerald-50/50 transition-all group">
+                <tr key={r.id} className="hover:bg-emerald-50/30 transition-all group">
                   <td className="px-10 py-8">
-                    <p className="font-black text-emerald-950 text-base uppercase tracking-tight">{r.student_name}</p>
-                    <div className="flex gap-2 mt-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 self-center"></span>
-                      <p className="text-[10px] text-emerald-600 font-bold uppercase">Verified</p>
-                    </div>
+                    <p className="font-black text-slate-900 text-base uppercase tracking-tight">{r.student_name}</p>
+                    <p className="text-[9px] text-emerald-600 font-bold uppercase mt-1 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-emerald-400 rounded-full"></span> Node ID: {r.id.substring(0,8)}
+                    </p>
                   </td>
                   <td className="px-6 py-8 text-center">
-                    <div className="grid grid-cols-3 gap-1 max-w-[180px] mx-auto">
+                    <div className="flex justify-center gap-1.5">
                       {(['quiz', 'laboratory', 'assignment'] as const).map((key) => (
-                        <div key={key} className="bg-white px-2 py-1 rounded text-[8px] font-black text-emerald-800 uppercase border border-emerald-100 shadow-sm">
-                          {key.substring(0, 2)}: {Number(r[key as keyof StudentRecord] || 0).toFixed(0)}
+                        <div key={key} className="bg-slate-100 px-2.5 py-1.5 rounded-lg text-[9px] font-black text-slate-600 uppercase border border-slate-200">
+                          {key.substring(0, 2)}: <span className="text-emerald-700">{Number(r[key] || 0).toFixed(0)}</span>
                         </div>
                       ))}
                     </div>
                   </td>
                   <td className="px-6 py-8 text-center">
-                    <div className="inline-block bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-100">
-                      <span className="text-xl font-black text-emerald-600">
-                        {r.final_grade?.toFixed(1)}%
+                    <div className="inline-block bg-emerald-50 px-5 py-2.5 rounded-2xl border border-emerald-100 shadow-inner">
+                      <span className="text-xl font-black text-emerald-700">
+                        {Number(r.final_grade || 0).toFixed(1)}%
                       </span>
                     </div>
                   </td>
                   <td className="px-10 py-8 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => handleEdit(r)} className="p-3 text-emerald-300 hover:text-emerald-600 hover:bg-emerald-100 rounded-2xl transition-all border border-transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <div className="flex justify-end gap-3 opacity-40 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => handleEdit(r)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
-                      <button onClick={() => deleteRecord(r.id)} className="p-3 text-emerald-200 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all border border-transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      <button onClick={() => deleteRecord(r.id)} className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all border border-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       </button>
                     </div>
                   </td>
@@ -222,7 +226,7 @@ export default function Home() {
               ))}
             </tbody>
           </table>
-          {loading && <div className="p-24 text-center font-black text-emerald-200 uppercase text-[10px] tracking-[0.5em] animate-pulse">Syncing...</div>}
+          {loading && <div className="p-32 text-center font-black text-emerald-200 uppercase text-[10px] tracking-[0.8em] animate-pulse">Establishing Secure Stream...</div>}
         </div>
       </section>
     </main>
