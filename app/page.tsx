@@ -58,12 +58,12 @@ export default function Home() {
       
       {/* SIDEBAR: Emerald Navigation */}
       <aside className="w-full md:w-80 bg-emerald-950 md:min-h-screen p-8 flex flex-col border-r border-emerald-800">
-        <div className="mb-10">
+        <div className="mb-10 text-center md:text-left">
           <h1 className="text-xl font-black text-white tracking-widest uppercase">Academic Portal</h1>
-          <div className="h-1.5 w-10 bg-emerald-400 mt-2 rounded-full"></div>
+          <div className="h-1.5 w-10 bg-emerald-400 mt-2 rounded-full mx-auto md:mx-0"></div>
         </div>
 
-        <div className="space-y-6 flex-grow overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-6 flex-grow overflow-y-auto pr-2">
           <div>
             <label className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 block">Identity</label>
             <input 
@@ -108,7 +108,7 @@ export default function Home() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <section className="flex-grow p-6 md:p-12 bg-emerald-50/30">
+      <section className="flex-grow p-6 md:p-12 bg-emerald-50/30 overflow-x-hidden">
         <header className="flex justify-between items-end mb-10 border-b border-emerald-100 pb-8">
           <div>
             <h2 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Management Console</h2>
@@ -131,7 +131,7 @@ export default function Home() {
                 <th className="px-10 py-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-50">
+            <tbody className="divide-y divide-emerald-50 text-black">
               {records.map((r) => (
                 <tr key={r.id} className="hover:bg-emerald-50/50 transition-all group">
                   <td className="px-10 py-8">
@@ -143,9 +143,9 @@ export default function Home() {
                   </td>
                   <td className="px-6 py-8 text-center">
                     <div className="grid grid-cols-3 gap-1 max-w-[180px] mx-auto">
-                      {['quiz', 'laboratory', 'assignment'].map(key => (
+                      {(['quiz', 'laboratory', 'assignment'] as const).map((key) => (
                         <div key={key} className="bg-white px-2 py-1 rounded text-[8px] font-black text-emerald-800 uppercase border border-emerald-100 shadow-sm">
-                          {key[0]}{key[1]}: {r[key as keyof StudentRecord]?.toFixed(0)}
+                          {key.substring(0, 2)}: {Number(r[key as keyof StudentRecord] || 0).toFixed(0)}
                         </div>
                       ))}
                     </div>
